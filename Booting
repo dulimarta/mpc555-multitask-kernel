@@ -1,0 +1,9 @@
+Settings of SW1 and SW2 on the CME-555 board.
+
+To boot from ROM Monitor:
+   SW1-6 : On
+   SW2-4 : Off
+
+To boot from MPC555 Internal Flash:
+   SW1-6 : Off
+   SW2-4 : On

@@ -1,0 +1,9 @@
+*.o
+*.bak
+*.log
+*.aux
+*.elf
+*.a
+CVS
+.cvsignore
+.depend
