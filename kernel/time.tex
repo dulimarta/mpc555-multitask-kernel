@@ -1,0 +1,153 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\begin{document}
+A process $p_i$ waiting to be waken up $c_i$ count later is decoded by a
+pair $(p_i,c_i)$. A number of such processes can be stored in a list
+$$
+(p_1, c_1),
+(p_2, c_2),
+...
+(p_n, c_n).$$
+The list is maintained in increasing order of $c_i$, i.e. shorter time
+to expire will be found in the beginning of the list.
+
+\section*{List Updating}
+When timer of $p_1$ expires, that is when $c_1$ reaches zero the list
+will be updated to:
+$$
+(p_1, 0),
+(p_2, c_2 - c_1),
+(p_3, c_3 - c_1),
+...
+(p_n, c_n - c_1).
+$$
+All other counter $c_i$ has to be substracted by $c_1$ because at this
+time the timer has elapsed $c_1$ counts.
+
+Later when timer of $p_2$ expires, the list will be updated to:
+$$
+(p_1, 0),
+(p_2, 0),
+(p_3, c_3 - c_1 - c_2 + c_1),
+(p_4, c_4 - c_1 - c_2 + c_1),
+...
+(p_n, c_n - c_1 - c_2 + c_1).
+$$
+or similarly,
+$$
+(p_1, 0),
+(p_2, 0),
+(p_3, c_3 - c_2),
+(p_4, c_4 - c_2),
+...
+(p_n, c_n - c_2).
+$$
+
+Again, when timer of $p_3$ expires, the list will be updated to:
+$$
+(p_1, 0),
+(p_2, 0),
+(p_3, 0),
+(p_4, c_4 - c_3),
+(p_5, c_5 - c_3),
+...
+(p_n, c_n - c_3).
+$$
+
+In general, after timer of $p_k$ expires, the list will be updated to:
+$$
+(p_1, 0),..., (p_k,0),
+(p_{k+1}, c_{k+1} - c_k),
+...,
+(p_n, c_n - c_k).
+$$
+
+\section*{Avoiding Global Update}
+The patterns show that after $c_k$ expires, timer of process $p_{k+1}$
+will always be updated to $c_{k+1} - c_k$. So, to avoid global update
+each time a timer expires, the list can be stored initially as:
+$$
+(p_1, c_1),
+(p_2, c_2 - c_1),
+(p_3, c_3 - c_2),
+...,
+(p_n, c_n - c_{n-1}).
+$$
+Note that this new list is \textit{not} ordered increasingly by the
+count element.
+
+\section*{Insertion of a new element}
+Suppose a new element $(p_a, c_a)$ is to be inserted to the existing
+list
+$$
+(p_1, c_1),
+(p_2, c_2 - c_1),
+...,
+(p_n, c_n - c_{n-1}).
+$$
+
+Depending on the value of $c_a$,
+there are three possible cases of insertion to consider:
+\begin{enumerate}
+\item Insertion at the head of the list, $c_a \le c_1$:
+
+The list should be updated to
+$$
+(p_a, c_a),
+(p_1, c_1 - c_a),
+(p_2, c_2 - c_1),
+...,
+(p_n, c_n - c_{n-1}).
+$$
+\item Insertion in the middle of the list, $c_k \le c_a < c_{k+1}$:
+
+The list should be updated to
+$$
+(p_1, c_1),
+...,
+(p_k, c_k - c_{k-1}),
+(p_a, c_a - c_k),
+(p_{k+1}, c_{k+1} - c_a),
+...,
+(p_n, c_n - c_{n-1}).
+$$
+\item Insertion at the end of the list, $c_n \le c_a$:
+
+The list should be updated to
+$$
+(p_1, c_1),
+(p_2, c_2 - c_1),
+...,
+(p_n, c_n - c_{n-1}),
+(p_a, c_a - c_n).
+$$
+\end{enumerate}
+As can be seen, in all the three cases at most two updates are required.
+One for the new element and possibly to the next element right after it.
+
+\section*{How to determine insertion point?}
+In the three cases mentioned above, the values of $c_k$, $c_{k+1}$, and
+$c_n$ are assumed to be readily accessible, but in fact they are not.
+Only the delta of the expiration count are stored in the list.
+However, the following observation will apply:
+
+\begin{eqnarray*}
+c_k \le& c_a       & < c_{k+1}\\
+  0 \le& c_a - c_k & < c_{k+1} - c_k\\
+\end{eqnarray*}
+Since the value of $c_{k+1} - c_k$ is stored in the list, the search can
+stop when this condition is met. But how to compute $c_a - c_k$ since
+only $c_k - c_{k-1}$ is available.
+
+During the traversal, when $c_a$ is cumulatively substracted by the
+expiration count element in the list, the following values will be
+obtained: 
+\begin{itemize}
+\item After substraction with the first element: $c_a - c_1$.
+\item After substraction of the last value with the second element:
+$c_a - c_1 - (c_2 - c_1) = c_a - c_2$
+\item After continuing the substraction up to the $k$-th element, 
+$c_a - c_k$ will be obtained.
+\end{itemize}
+\end{document}
